@@ -72,9 +72,9 @@ public class RequireFileChecksum
                 throw new EnforcerRuleException( "Cannot read file: " + this.file.getAbsolutePath() );
             }
 
-            helper.getLog().debug( "Size " + this.file.getTotalSpace() );
             byte[] b = Files.readAllBytes( Paths.get( this.file.toString() ) );
 
+            helper.getLog().debug( " Byte size: " + b.length );
             String checksum;
             if ( "md5".equals( this.type ) )
             {
