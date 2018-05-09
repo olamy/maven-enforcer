@@ -63,6 +63,7 @@
     </site>
   </distributionManagement>
   <properties>
+    <surefire.version>2.21.0</surefire.version>
     <maven.version>3.0</maven.version>
     <maven.site.path>enforcer-archives/enforcer-LATEST</maven.site.path>
   </properties>
