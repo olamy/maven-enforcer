@@ -20,14 +20,15 @@ package org.apache.maven.plugins.enforcer;
  */
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
-import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Rule to validate a file to match the specified checksum.
@@ -64,7 +65,6 @@ public class RequireFileChecksum
             throw new EnforcerRuleException( "Checksum unspecified" );
         }
 
-        InputStream inputStream = null;
         try
         {
             if ( this.file.isDirectory() || !this.file.canRead() )
@@ -72,27 +72,34 @@ public class RequireFileChecksum
                 throw new EnforcerRuleException( "Cannot read file: " + this.file.getAbsolutePath() );
             }
 
-            inputStream = new FileInputStream( this.file );
+            helper.getLog().debug( "Size " + this.file.getTotalSpace() );
+            byte[] b = Files.readAllBytes( Paths.get( this.file.toString() ) );
+
             String checksum;
             if ( "md5".equals( this.type ) )
             {
-                checksum = DigestUtils.md5Hex( inputStream );
+                byte[] hash = MessageDigest.getInstance( "MD5" ).digest( b );
+                checksum = Hex.encodeHexString( hash );
             }
             else if ( "sha1".equals( this.type ) )
             {
-                checksum = DigestUtils.shaHex( inputStream );
+                byte[] hash = MessageDigest.getInstance( "SHA-1" ).digest( b );
+                checksum = Hex.encodeHexString( hash );
             }
             else if ( "sha256".equals( this.type ) )
             {
-                checksum = DigestUtils.sha256Hex( inputStream );
+                byte[] hash = MessageDigest.getInstance( "SHA-256" ).digest( b );
+                checksum = Hex.encodeHexString( hash );
             }
             else if ( "sha384".equals( this.type ) )
             {
-                checksum = DigestUtils.sha384Hex( inputStream );
+                byte[] hash = MessageDigest.getInstance( "SHA-384" ).digest( b );
+                checksum = Hex.encodeHexString( hash );
             }
             else if ( "sha512".equals( this.type ) )
             {
-                checksum = DigestUtils.sha512Hex( inputStream );
+                byte[] hash = MessageDigest.getInstance( "SHA-512" ).digest( b );
+                checksum = Hex.encodeHexString( hash );
             }
             else
             {
@@ -108,9 +115,13 @@ public class RequireFileChecksum
         {
             throw new EnforcerRuleException( "Unable to calculate checksum", e );
         }
+        catch ( NoSuchAlgorithmException e )
+        {
+            throw new EnforcerRuleException( "Unable to calculate checksum", e );
+        }
         finally
         {
-            IOUtil.close( inputStream );
+            // IOUtil.close( inputStream );
         }
     }
 
